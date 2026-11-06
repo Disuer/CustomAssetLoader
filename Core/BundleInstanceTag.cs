@@ -16,4 +16,10 @@ public sealed class BundleInstanceTag : MonoBehaviour
     {
         ClassInjector.DerivedConstructorBody(this);
     }
+
+    /// <summary>
+    /// Cache key of the mod bundle this instance was loaded from.
+    /// Timeline SFX uses it so two bundles that reuse a timeline name do not share cues.
+    /// </summary>
+    public string BundleKey;
 }

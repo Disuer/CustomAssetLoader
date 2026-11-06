@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using Addressable;
+using CustomAssetLoader.Managers.SFX;
 using BepInEx;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
@@ -156,6 +157,7 @@ public static class BundleManager
 
     private static void UnloadLoadedModBundles()
     {
+        TimelineSfxLibrary.Clear();
         foreach (KeyValuePair<string, AssetBundle> pair in LoadedBundles)
         {
             AssetBundle bundle = pair.Value;
@@ -801,6 +803,18 @@ public static class BundleManager
         }
 
         ShaderRemapper.RemapPrefabAsset(prefab);
+        if (TryGetBundleCacheKey(entry, out string bundleKey))
+        {
+            try
+            {
+                TimelineSfxLibrary.ScanPrefab(prefab, bundleKey);
+            }
+            catch (Exception ex)
+            {
+                BundleLog.Error($"Timeline SFX prefab scan failed for {bundleKey}: {ex.Message}");
+            }
+        }
+
         return true;
     }
 
@@ -821,7 +835,12 @@ public static class BundleManager
             ShaderRemapper.RemapPrefabAsset(instance);
 
             EnsureInstanceTagRegistered();
-            instance.AddComponent<BundleInstanceTag>();
+            BundleInstanceTag tag = instance.AddComponent<BundleInstanceTag>();
+            if (TryResolveGameObjectEntry(label, resourceId, out BundleOverrideEntry taggedEntry)
+                && TryGetBundleCacheKey(taggedEntry, out string bundleKey))
+            {
+                tag.BundleKey = bundleKey;
+            }
             BundleLog.Verbose(
                 $"[CustomAssetLoader] Tagged bundle instance " +
                 $"label={label} resourceId={resourceId} go={instance.name} " +
@@ -981,7 +1000,46 @@ public static class BundleManager
             return false;
         }
 
+        try
+        {
+            TimelineSfxLibrary.ScanBundle(bundle, cacheKey);
+        }
+        catch (Exception ex)
+        {
+            BundleLog.Error($"Timeline SFX scan failed for {cacheKey}: {ex.Message}");
+        }
+
         LoadedBundles[cacheKey] = bundle;
+        return true;
+    }
+
+    private static bool TryGetBundleCacheKey(BundleOverrideEntry entry, out string cacheKey)
+    {
+        cacheKey = null;
+        if (entry == null || string.IsNullOrEmpty(entry.bundle))
+        {
+            return false;
+        }
+
+        string lookupKey = entry.GetKey();
+        if (!OverrideBundleDirectory.TryGetValue(lookupKey, out string bundleDir))
+        {
+            foreach (KeyValuePair<string, BundleOverrideEntry> pair in OverrideMap)
+            {
+                if (pair.Value == entry)
+                {
+                    OverrideBundleDirectory.TryGetValue(pair.Key, out bundleDir);
+                    break;
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(bundleDir))
+        {
+            return false;
+        }
+
+        cacheKey = Path.Combine(bundleDir, entry.bundle);
         return true;
     }
 

@@ -4,7 +4,7 @@ public static class PluginConfig
 {
     public const string GUID = $"{AUTHOR}.{PLUGIN_NAME}";
     public const string PLUGIN_NAME = "CustomAssetLoader";
-    public const string VERSION = "1.3.0";
+    public const string VERSION = "1.4.0";
     public const string AUTHOR = "Doppelglower";
     public const string BUNDLE_DIRECTORY = "custom_bundles";
     public const string BANK_DIRECTORY = "custom_banks";

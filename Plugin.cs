@@ -22,6 +22,8 @@ public sealed class Plugin : BasePlugin
         BattleEffectListPatches.Apply(harmony);
         CustomBundleMotionPatches.Apply(harmony);
         BankPatches.Apply(harmony);
+        SpriteIdlePatches.Apply(harmony);
+        TimelineSfxPatches.Apply(harmony);
 
         BundleLog.Loaded($"{PLUGIN_NAME} v{VERSION} loaded.");
     }
