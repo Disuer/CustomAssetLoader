@@ -11,6 +11,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
+using System.Linq;
 
 namespace CustomAssetLoader.Managers;
 
@@ -1245,6 +1246,10 @@ public static class BundleManager
             if (ability != null && ability.effectObj != null)
             {
                 ShaderRemapper.RemapPrefabAsset(ability.effectObj);
+            }
+            if (ability.effectObj.name.StartsWith("CustomBuff_"))
+            {
+                ability.keyword = Lethe.EnumInjections.CustomBuffs.ParseBuffUniqueKeyword(ability.effectObj.name.Substring("CustomBuff_".Length));
             }
         }
     }

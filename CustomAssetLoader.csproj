@@ -51,6 +51,9 @@
     <Reference Include="$(LimbusCompanyFolder)\BepInEx\plugins\ModularSkillScripts.dll">
       <HintPath>%(Identity)</HintPath>
     </Reference>
+    <Reference Include="$(LimbusCompanyFolder)\BepInEx\plugins\Lethe.dll">
+      <HintPath>%(Identity)</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="CopyFile" AfterTargets="build">
